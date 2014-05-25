@@ -18,7 +18,7 @@ SCRIPT_DIR=`cd $(dirname $0) && pwd`
 #
 function usage
 {
-    echo "Usage: $SCRIPT_NAME"
+    echo "Usage: $SCRIPT_NAME -n <node name>"
     exit 1
 }
 
@@ -31,29 +31,48 @@ if [ `id -un` != "ec2-user" ]; then
 fi
 
 #
+# Parse command line args
+#
+while getopts "n:" opt; do
+    case $opt in
+        n) 
+            node=$OPTARG;;
+        \?) 
+            echo "Invalid option: -$OPTARG"; usage;;
+    esac
+done
+
+if [ -z "$node" ]; then
+    usage
+fi
+
+#
 # Variables
 #
-remote_repo_url="http://public-repo-1.hortonworks.com/HDP/centos6/2.x/GA/2.1-latest/hdp.repo"
-repo_match_str="^HDP"
+work_dir="/tmp/work"
+git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 
 #
 # Main
 #
 echo -e "\nStarting $SCRIPT_NAME at `date`"
 
-# Add the REPO
-echo -e "\n#####  Adding repo from $remote_repo_url"
-sudo wget -nv $remote_repo_url -O /etc/yum.repos.d/hdp.repo 
-echo "SUCCESS"
-
-# locate the latest java install
-echo -e "\n#####  Validating that the repo was added"
-if ! sudo yum repolist | grep -q "$repo_match_str"; then
-    echo "ERROR: Repo does not appear to have been added"
-    sudo yum repolist
-    exit 1
+# Setup work dir on remote node
+echo -e "\n#####  Setup work_dir on remote node"
+ec2-ssh $node "test -d $work_dir"
+if [ $? -eq 0 ]; then
+    echo "Removing and recreating $work_dir on $node"
+    ec2-ssh $node "rm -rf $work_dir && mkdir -p $work_dir" || exit 1
+    echo "SUCCESS"
+else
+    echo "Creating $work_dir on $node"
+    ec2-ssh $node "mkdir -p $work_dir" || exit 1
+    echo "SUCCESS"
 fi
-sudo yum repolist
+
+# pull down ec2oop repo on remote node
+echo -e "\n#####  Pulling repo $git_ec2oop_url on $node"
+ec2-ssh $node "cd $work_dir && git clone $git_ec2oop_url" || exit 1
 echo "SUCCESS"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
