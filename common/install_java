@@ -71,5 +71,13 @@ echo "JAVA_HOME is: $JAVA_HOME"
 echo "PATH is: $PATH"
 echo "SUCCESS"
 
+# Symlinking $java_version_path to /usr/java/default
+echo -e "\n#####  Symlinking $java_version_path to /usr/java/default"
+if [ ! -L /usr/java/default ]; then
+    sudo mkdir -p /usr/java || exit 1
+    sudo ln -s $java_version_path /usr/java/default || exit 1
+fi
+echo "SUCCESS"
+
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0
