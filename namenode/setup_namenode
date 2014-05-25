@@ -83,5 +83,14 @@ echo -e "\n#####  Pulling repo $git_ec2oop_url on $node"
 ec2-ssh $node "cd $work_dir && git clone $git_ec2oop_url" || exit 1
 echo "SUCCESS"
 
+# Create namenode directories
+echo -e "\n#####  Creating directory $DFS_NAME_DIR on $node"
+ec2-ssh $node "sudo mkdir -p $DFS_NAME_DIR" || exit 1
+ec2-ssh $node "sudo chown -R $HDFS_USER:$HADOOP_GROUP $DFS_NAME_DIR" || exit 1
+ec2-ssh $node "chmod -R 755 $DFS_NAME_DIR" || exit 1
+echo "$DFS_NAME_DIR contents:"
+ec2-ssh $node "find $DFS_NAME_DIR"
+echo "SUCCESS"
+
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0
