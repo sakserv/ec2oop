@@ -33,7 +33,7 @@ fi
 #
 # Parse command line args
 #
-while getopts "n:" opt; do
+while getopts "n:e:" opt; do
     case $opt in
         n) 
             node=$OPTARG;;
@@ -48,6 +48,10 @@ if [ -z "$node" ]; then
     usage
 fi
 
+if [ -z "$ensemble" ]; then
+    usage
+fi
+
 #
 # Variables
 #
@@ -57,7 +61,7 @@ helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
 core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
 zk_conf_dir="$helpers_dir/configuration_files/zookeeper"
-zoo_cfg=$zk_conf_dir
+zoo_cfg="$zk_conf_dir/zoo.cfg"
 pkg_list="zookeeper openssl"
 
 #
@@ -133,28 +137,29 @@ echo "SUCCESS"
 count=1
 for zk in $ensemble; do 
     echo -e "\n#####  Setting server.$count to $zk in $zoo_cfg"
-    ec2-ssh $zk "sudo sed -i 's|.*server\.'$count'.*|server.'$count'='$zk':2888:3888|g' $zoo_cfg" || exit 1
+    ec2-ssh $node "sudo sed -i 's|.*server\.'$count'.*|server.'$count'='$zk':2888:3888|g' $zoo_cfg" || exit 1
     count=$(( count + 1 ))
 done
-echo "$zoo_cfg contents:"
-cat $zoo_cfg
+echo "$zoo_cfg contents on $node:"
+ec2-ssh $node "cat $zoo_cfg"
 echo "SUCCESS"
 
 # Set the data directory in the config
 echo -e "\n#####  Setting zookeeper data directory to: $ZOOKEEPER_DATA_DIR"
 ec2-ssh $node "sudo sed -i 's|.*dataDir.*|dataDir='$ZOOKEEPER_DATA_DIR'|g' $zoo_cfg" || exit 1
-echo "$zoo_cfg contents:"
-cat $zoo_cfg
+echo "$zoo_cfg contents on $node:"
+ec2-ssh $node "cat $zoo_cfg"
 echo "SUCCESS"
 
 # Lay down zookeeper config
 echo -e "\n#####  Installing zookeeeper config to: $ZOOKEEPER_CONF_DIR"
-if [ -d $ZOOKEEPER_CONF_DIR ]; then
+if ec2-ssh $node "test -d $ZOOKEEPER_CONF_DIR"; then
     echo "Removing $ZOOKEEPER_CONF_DIR"
-    rm -rf $ZOOKEEPER_CONF_DIR || exit 1
+    ec2-ssh $node "sudo rm -rf $ZOOKEEPER_CONF_DIR" || exit 1
 fi
-mkdir -p $ZOOKEEPER_CONF_DIR || exit 1
-ec2-ssh $node "sudo -u zookeeper cp $zk_conf_dir/* $ZOOKEEPER_CONF_DIR/"
+# make the new conf dir and copy over the configs
+ec2-ssh $node "sudo mkdir -p $ZOOKEEPER_CONF_DIR" || exit 1
+ec2-ssh $node "sudo cp $zk_conf_dir/* $ZOOKEEPER_CONF_DIR/" || exit 1
 echo "$ZOOKEEPER_CONF_DIR contents:"
 ec2-ssh $node "sudo find $ZOOKEEPER_CONF_DIR -ls"
 

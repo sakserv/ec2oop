@@ -63,13 +63,13 @@ source $helpers_dir/scripts/directories.sh
 #
 echo -e "\nStarting $SCRIPT_NAME at `date`"
 
-count=1
 for zk in $zk_list; do
-    echo -e "\n#####  Initializing myid file for $zk"
-    if [ ! -f $ZOOKEEPER_DATA_DIR/myid ]; then
-        echo $count | sudo -u zookeeper tee $ZOOKEEPER_DATA_DIR/myid || exit 1
+    myid=`echo $zk | sed 's|[^0-9]||g'`
+    echo -e "\n#####  Initializing myid file for $zk with id $myid"
+    if ! ec2-ssh $zk "test -f $ZOOKEEPER_DATA_DIR/myid"; then
+        ec2-ssh $zk "echo $count | sudo -u zookeeper tee $ZOOKEEPER_DATA_DIR/myid" || exit 1
     else
-        echo "Skipping myid creation, $ZOOKEEPER_DATA_DIR/myid already exists"
+        echo "Skipping myid creation, $ZOOKEEPER_DATA_DIR/myid already exists on $zk"
     fi
 done
 echo "SUCCESS"
@@ -78,8 +78,8 @@ echo "SUCCESS"
 # start the zk ensemble
 for zk in $zk_list; do
     echo -e "\n#####  Starting the zookeeper node $zk"
-    if ! ec2-ssh $zk "ps -ef | grep -v grep | grep -q proc_zookeeper"; then
-        ec2-ssh $jhs "sudo -u zookeeper ZOOCFGDIR=/etc/zookeeper/conf source /etc/zookeeper/conf/zookeeper-env.sh; /usr/lib/zookeeper/bin/zkServer.sh start >> /var/log/zookeeper/zoo.out 2>&1" || exit 1
+    if ! ec2-ssh $zk "ps -ef | grep -v grep | grep -q QuorumPeerMain"; then
+        ec2-ssh $zk "sudo -u zookeeper ZOOCFGDIR=/etc/zookeeper/conf /usr/lib/zookeeper/bin/zkServer.sh start | sudo -u zookeeper tee /var/log/zookeeper/zoo.out 2>&1" || exit 1
     else
         echo -e "\n#####  Skipping start, zookeeper node $zk already running"
     fi
