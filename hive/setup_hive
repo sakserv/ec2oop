@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################
 #
-#  Name: setup_jobhistoryserver
-#  Purpose: Initial jobhistoryserver setup
+#  Name: setup_hive
+#  Purpose: Initial hive setup
 #  Author: Shane Kumpf
 #
 ###################################################
@@ -54,15 +54,16 @@ git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
 core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
-pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl hive hive-hcatalog"
+hive_conf_dir="$helpers_dir/configuration_files/hive"
+pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl hive hive-hcatalog mysql-server mysql-connector-java"
 
 #
 # Source helpers
 #
 source $helpers_dir/scripts/usersAndGroups.sh
 source $helpers_dir/scripts/directories.sh
-dirs_to_create="$HADOOP_CONF_DIR"
-dirs_user="$HDFS_USER"
+dirs_to_create="$HIVE_LOG_DIR $HIVE_CONF_DIR $HADOOP_CONF_DIR"
+dirs_user="$HIVE_USER"
 dirs_group="$HADOOP_GROUP"
 
 #
@@ -136,6 +137,22 @@ ec2-ssh $node "sudo mkdir -p $HIVE_CONF_DIR" || exit 1
 ec2-ssh $node "sudo cp $hive_conf_dir/* $HIVE_CONF_DIR/" || exit 1
 echo "$HIVE_CONF_DIR contents:"
 ec2-ssh $node "sudo find $HIVE_CONF_DIR -ls"
+
+
+# Configure mysql
+echo -e "\n#####  Configuring mysql for hive metastore"
+echo "Starting mysql"
+ec2-ssh $node "sudo chkconfig mysqld on" || exit 1
+ec2-ssh $node "sudo service mysqld start" || exit 1
+echo "Creating the root account"
+ec2-ssh $node "sudo mysqladmin -u root --password=mysql password 'mysql'" || exit 1
+echo "Creating the hive account"
+ec2-ssh $node "sudo mysql -u root --password=mysql -f $hive_conf_dir/grants.sql" || exit 1
+
+# Initialize the schema
+echo -e "\n#####  Installing hive database schema on $node"
+ec2-ssh $node "sudo -u hive $HIVE_HOME/bin/schematool -initSchema mysql" || exit 1
+echo "SUCCESS"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0

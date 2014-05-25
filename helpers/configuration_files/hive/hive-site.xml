@@ -43,11 +43,11 @@ limitations under the License.
   </property>
   <property>
     <name>javax.jdo.option.ConnectionUserName</name>
-    <value>TODO-HIVE-METASTORE-USER-NAME</value>
+    <value>hive</value>
   </property>
   <property>       
    <name>javax.jdo.option.ConnectionPassword</name>       
-   <value>TODO-HIVE-METASTORE-PASSWORD</value>  
+   <value>hive</value>  
    <description>Enter your MySQL credentials. </description>
   </property>
   <property>
@@ -76,7 +76,7 @@ limitations under the License.
   </property>
     <property>
     <name>javax.jdo.option.ConnectionURL</name>
-    <value>jdbc:mysql://TODO-HIVE-MYSQL-SERVER:TODO-HIVE-MYSQL-PORT/TODO-HIVE-DATABASE-NAME?createDatabaseIfNotExist=true</value>
+    <value>jdbc:mysql://hive.hadoop:3306/hive?createDatabaseIfNotExist=true</value>
   </property>
     <property>
     <name>hive.enforce.bucketing</name>
@@ -92,7 +92,7 @@ limitations under the License.
   </property>
     <property>
     <name>hive.metastore.uris</name>
-    <value>thrift://TODO-HIVE-METASTORE-SERVER-HOST:9083</value>
+    <value>thrift://hive.hadoop:9083</value>
   </property>
     <property>
     <name>hive.metastore.execute.setugi</name>
