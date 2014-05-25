@@ -53,6 +53,7 @@ work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
+core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
 pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl"
 
 #
@@ -60,6 +61,9 @@ pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-
 #
 source $helpers_dir/scripts/usersAndGroups.sh
 source $helpers_dir/scripts/directories.sh
+dirs_to_create="$HADOOP_CONF_DIR"
+dirs_user="$HDFS_USER"
+dirs_group="$HADOOP_GROUP"
 
 #
 # Main
@@ -98,6 +102,17 @@ echo "SUCCESS"
 for pkg in $pkg_list; do
     echo -e "\n#####  Installing $pkg on $node"
     ec2-ssh $node "sudo yum install -y $pkg" || exit 1
+    echo "SUCCESS"
+done
+
+# Create needed directories
+for dir_name in $dirs_to_create; do
+    echo -e "\n#####  Creating directory $dir_name on $node"
+    ec2-ssh $node "sudo mkdir -p $dir_name" || exit 1
+    ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $dir_name" || exit 1
+    ec2-ssh $node "sudo chmod -R 755 $dir_name" || exit 1
+    echo "$dir_name contents:"
+    ec2-ssh $node "find $dir_name -ls"
     echo "SUCCESS"
 done
 

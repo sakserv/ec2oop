@@ -53,6 +53,7 @@ work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
+core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
 pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-client openssl"
 
 #
@@ -60,7 +61,7 @@ pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-client openssl"
 #
 source $helpers_dir/scripts/usersAndGroups.sh
 source $helpers_dir/scripts/directories.sh
-dirs_to_create="$DFS_NAME_DIR $HDFS_LOG_DIR $HDFS_PID_DIR"
+dirs_to_create="$DFS_NAME_DIR $HDFS_LOG_DIR $HDFS_PID_DIR $HADOOP_CONF_DIR"
 dirs_user="$HDFS_USER"
 dirs_group="$HADOOP_GROUP"
 
@@ -114,6 +115,15 @@ for dir_name in $dirs_to_create; do
     ec2-ssh $node "find $dir_name -ls"
     echo "SUCCESS"
 done
+
+# Copy core hadoop config to $HADOOP_CONF_DIR
+echo -e "\n#####  Copying core hadoop config from $core_conf_dir to $HADOOP_CONF_DIR"
+ec2-ssh $node "sudo cp -Rp $core_conf_dir/* $HADOOP_CONF_DIR/" || exit 1
+ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $HADOOP_CONF_DIR" || exit 1
+ec2-ssh $node "sudo chmod -R 755 $HADOOP_CONF_DIR" || exit 1
+echo "$HADOOP_CONF_DIR contents:"
+ec2-ssh $node "find $HADOOP_CONF_DIR -ls"
+echo "SUCCESS"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0
