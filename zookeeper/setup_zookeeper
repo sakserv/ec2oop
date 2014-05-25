@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################
 #
-#  Name: setup_namenode
-#  Purpose: Initial namenode setup
+#  Name: setup_zookeeper
+#  Purpose: Initial zookeeper setup
 #  Author: Shane Kumpf
 #
 ###################################################
@@ -98,8 +98,8 @@ echo -e "\n#####  Installing base Hadoop packages"
 ec2-ssh $node "$common_dir/install_base_hadoop_pkgs" || exit 1
 echo "SUCCESS"
 
-# Create namenode directories
-for dir_name in $DFS_NAME_DIR; do
+# Create zookeeper directories
+for dir_name in $ZOOKEEPER_DATA_DIR; do
     echo -e "\n#####  Creating directory $dir_name on $node"
     ec2-ssh $node "sudo mkdir -p $dir_name" || exit 1
     ec2-ssh $node "sudo chown -R $HDFS_USER:$HADOOP_GROUP $dir_name" || exit 1
