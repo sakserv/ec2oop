@@ -78,23 +78,23 @@ echo -e "\nStarting $SCRIPT_NAME at `date`"
 
 # format the namenode
 echo -e "\n#####  Formatting the namenode $nn"
-ec2-ssh $nn "sudo -u hdfs '/usr/lib/hadoop/bin/hadoop namenode -format'" || exit 1
+ec2-ssh $nn "sudo -u hdfs /usr/bin/hdfs namenode -format" || exit 1
 echo "SUCCESS"
 
 # start the PNN
 echo -e "\n#####  Starting the namenode $nn"
-ec2-ssh $nn "sudo -u hdfs '/usr/lib/hadoop/sbin/hadoop-daemon.sh --config '$HADOOP_CONF_DIR' start namenode'" || exit 1
+ec2-ssh $nn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start namenode" || exit 1
 echo "SUCCESS"
 
 # start the SNN
 echo -e "\n#####  Starting the secondary namenode $snn"
-ec2-ssh $snn "sudo -u hdfs '/usr/lib/hadoop/sbin/hadoop-daemon.sh --config '$HADOOP_CONF_DIR' start secondarynamenode'" || exit 1
+ec2-ssh $snn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start secondarynamenode" || exit 1
 echo "SUCCESS"
 
 # start the datanodes
 for dn in $dn_list; do
     echo -e "\n#####  Starting the datanode $dn"
-    ec2-ssh $dn "sudo -u hdfs '/usr/lib/hadoop/sbin/hadoop-daemon.sh --config '$HADOOP_CONF_DIR' start datanode'" || exit 1
+    ec2-ssh $dn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start datanode" || exit 1
     echo "SUCCESS"
 done
 
