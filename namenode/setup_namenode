@@ -122,7 +122,7 @@ ec2-ssh $node "sudo cp -Rp $core_conf_dir/* $HADOOP_CONF_DIR/" || exit 1
 ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $HADOOP_CONF_DIR" || exit 1
 ec2-ssh $node "sudo chmod -R 755 $HADOOP_CONF_DIR" || exit 1
 echo "$HADOOP_CONF_DIR contents:"
-ec2-ssh $node "find $HADOOP_CONF_DIR -ls"
+ec2-ssh $node "find $HADOOP_CONF_DIR/ -ls"
 echo "SUCCESS"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
