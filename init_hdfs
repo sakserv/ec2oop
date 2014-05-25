@@ -86,17 +86,17 @@ done
 if [ -z "$is_formatted" ]; then 
     echo -e "\n#####  Formatting the namenode $nn"
     ec2-ssh $nn "sudo -u hdfs /usr/bin/hdfs namenode -format" || exit 1
-    echo "SUCCESS"
 else
-    echo -e "\n#####  Skipping format, namenode $nn already formatted"
+    echo -e "Skipping format, namenode $nn already formatted"
 fi
+echo "SUCCESS"
 
 # start the PNN
 echo -e "\n#####  Starting the namenode $nn"
 if ! ec2-ssh $nn "ps -ef | grep -v grep | grep -q proc_namenode"; then
     ec2-ssh $nn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start namenode" || exit 1
 else
-    echo -e "\n#####  Skipping start, namenode $nn already running"
+    echo -e "Skipping start, namenode $nn already running"
 fi
 echo "SUCCESS"
 
@@ -105,7 +105,7 @@ echo -e "\n#####  Starting the secondary namenode $snn"
 if ! ec2-ssh $snn "ps -ef | grep -v grep | grep -q proc_secondarynamenode"; then
     ec2-ssh $snn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start secondarynamenode" || exit 1
 else
-    echo -e "\n#####  Skipping start, secondary namenode $snn already running"
+    echo -e "Skipping start, secondary namenode $snn already running"
 fi
 echo "SUCCESS"
 
@@ -115,7 +115,7 @@ for dn in $dn_list; do
     if ! ec2-ssh $dn "ps -ef | grep -v grep | grep -q proc_datanode"; then
         ec2-ssh $dn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start datanode" || exit 1
     else
-        echo -e "\n#####  Skipping start, datanode $dn already running"
+        echo -e "Skipping start, datanode $dn already running"
     fi
     echo "SUCCESS"
 done

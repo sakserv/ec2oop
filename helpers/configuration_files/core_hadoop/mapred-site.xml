@@ -18,7 +18,7 @@
   </property>
     <property>
     <name>mapreduce.cluster.reducememory.mb</name>
-    <value>2048</value>
+    <value>1024</value>
   </property>
     <property>
     <name>mapred.child.java.opts</name>
@@ -38,7 +38,7 @@
   </property>
     <property>
     <name>mapred.cluster.max.reduce.memory.mb</name>
-    <value>4096</value>
+    <value>2048</value>
   </property>
     <property>
     <name>mapreduce.jobhistory.intermediate-done-dir</name>
@@ -46,7 +46,7 @@
   </property>
     <property>
     <name>mapred.cluster.max.map.memory.mb</name>
-    <value>6144</value>
+    <value>2048</value>
   </property>
     <property>
     <name>mapreduce.map.sort.spill.percent</name>
@@ -66,7 +66,7 @@
   </property>
     <property>
     <name>mapreduce.map.memory.mb</name>
-    <value>1536</value>
+    <value>1024</value>
   </property>
     <property>
     <name>mapreduce.output.fileoutputformat.compress.type</name>
@@ -106,7 +106,7 @@
   </property>
     <property>
     <name>mapred.cluster.map.memory.mb</name>
-    <value>1536</value>
+    <value>1024</value>
   </property>
     <property>
     <name>mapreduce.reduce.shuffle.merge.percent</name>
@@ -118,7 +118,7 @@
   </property>
     <property>
     <name>mapreduce.reduce.memory.mb</name>
-    <value>2048</value>
+    <value>1024</value>
   </property>
     <property>
     <name>mapreduce.job.reduce.slowstart.completedmaps</name>

@@ -1,0 +1,109 @@
+#!/bin/bash
+###################################################
+#
+#  Name: init_hdfs
+#  Purpose: Initial namenode setup
+#  Author: Shane Kumpf
+#
+###################################################
+
+#
+# Base variables
+#
+SCRIPT_NAME=`basename $0`
+SCRIPT_DIR=`cd $(dirname $0) && pwd`
+
+#
+# Functions
+#
+function usage
+{
+    echo "Usage: $SCRIPT_NAME -n <namenode> -s <sec namenode> -d \"<datanode1 [datanode2...]>\""
+    exit 1
+}
+
+#
+# Validation
+#
+if [ `id -un` != "ec2-user" ]; then
+    echo "ERROR: Must run as ec2-user"
+    exit 1
+fi
+
+#
+# Parse command line args
+#
+while getopts "n:s:d:" opt; do
+    case $opt in
+        n) 
+            nn=$OPTARG;;
+        s) 
+            snn=$OPTARG;;
+        d)
+            dn_list="$OPTARG";;
+        \?) 
+            echo "Invalid option: -$OPTARG"; usage;;
+    esac
+done
+
+if [ -z "$nn" ]; then
+    usage
+fi
+
+if [ -z "$snn" ]; then
+    usage
+fi
+
+if [ -z "$dn_list" ]; then
+    usage
+fi
+
+#
+# Variables
+#
+work_dir="/tmp/work"
+git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
+helpers_dir="$work_dir/ec2oop/helpers"
+
+#
+# Source helpers
+#
+source $helpers_dir/scripts/usersAndGroups.sh
+source $helpers_dir/scripts/directories.sh
+
+#
+# Main
+#
+echo -e "\nStarting $SCRIPT_NAME at `date`"
+
+# start the datanodes
+for dn in $dn_list; do
+    echo -e "\n#####  Stopping the datanode $dn"
+    if ec2-ssh $dn "ps -ef | grep -v grep | grep -q proc_datanode"; then
+        ec2-ssh $dn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR stop datanode" || exit 1
+    else
+        echo -e "Skipping stop, datanode $dn already stopped"
+    fi
+    echo "SUCCESS"
+done
+
+# start the SNN
+echo -e "\n#####  Stopping the secondary namenode $snn"
+if ec2-ssh $snn "ps -ef | grep -v grep | grep -q proc_secondarynamenode"; then
+    ec2-ssh $snn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR stop secondarynamenode" || exit 1
+else
+    echo -e "Skipping stop, secondary namenode $snn already stopped"
+fi
+echo "SUCCESS"
+
+# start the PNN
+echo -e "\n#####  Stopping the namenode $nn"
+if ec2-ssh $nn "ps -ef | grep -v grep | grep -q proc_namenode"; then
+    ec2-ssh $nn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR stop namenode" || exit 1
+else
+    echo -e "Skipping stop, namenode $nn already stopped"
+fi
+echo "SUCCESS"
+
+echo -e "\nFinished $SCRIPT_NAME at `date`"
+exit 0

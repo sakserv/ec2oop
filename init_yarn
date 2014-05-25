@@ -69,24 +69,38 @@ source $helpers_dir/scripts/directories.sh
 #
 echo -e "\nStarting $SCRIPT_NAME at `date`"
 
+# Create the hdfs /app-logs directory for log aggregation
+echo -e "\n#####  Creating the remote app log dir for log aggregation"
+sudo -u hdfs hdfs dfs -mkdir -p /app-logs || exit 1
+sudo -u hdfs hdfs dfs -chmod -R 1777 /app-logs || exit 1
+sudo -u hdfs hdfs dfs -chown -R yarn /app-logs || exit 1
+echo "SUCCESS"
+
 # start the RM
 echo -e "\n#####  Starting the resourcemanager $resm"
 if ! ec2-ssh $resm "ps -ef | grep -v grep | grep -q proc_resourcemanager"; then
     ec2-ssh $resm "sudo -u yarn HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec /usr/lib/hadoop-yarn/sbin/yarn-daemon.sh --config $HADOOP_CONF_DIR start resourcemanager" || exit 1
 else
-    echo -e "\n#####  Skipping start, resourcemanager $rm already running"
+    echo -e "Skipping start, resourcemanager $rm already running"
 fi
 echo "SUCCESS"
 
 # start the nodemanagers
 for nm in $nm_list; do
+  
+    echo -e "\n#####  Fixing container-executor perms for nodemanager $nm"
+    ec2-ssh $nm "sudo chown -R root:hadoop /usr/lib/hadoop-yarn/bin/container-executor" || exit 1
+    ec2-ssh $nm "sudo chmod -R 6050 /usr/lib/hadoop-yarn/bin/container-executor" || exit 1
+    echo "SUCCESS"
+
     echo -e "\n#####  Starting the nodemanager $nm"
     if ! ec2-ssh $nm "ps -ef | grep -v grep | grep -q proc_nodemanager"; then
         ec2-ssh $nm "sudo -u yarn HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec /usr/lib/hadoop-yarn/sbin/yarn-daemon.sh --config $HADOOP_CONF_DIR start nodemanager" || exit 1
     else
-        echo -e "\n#####  Skipping start, nodemanager $nm already running"
+        echo -e "Skipping start, nodemanager $nm already running"
     fi
     echo "SUCCESS"
+
 done
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
