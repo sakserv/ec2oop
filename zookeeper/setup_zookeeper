@@ -53,7 +53,7 @@ work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
-pkg_list="hadoop zookeeper openssl"
+pkg_list="zookeeper openssl"
 
 #
 # Source helpers
@@ -99,8 +99,8 @@ echo "SUCCESS"
 
 # Install Hadoop packages
 for pkg in $pkg_list; do
-    echo -e "\n#####  Installing $pkg"
-    sudo yum install -y $pkg || exit 1
+    echo -e "\n#####  Installing $pkg on $node"
+    ec2-ssh $node "sudo yum install -y $pkg" || exit 1
     echo "SUCCESS"
 done
 
