@@ -1,0 +1,72 @@
+#!/bin/bash
+###################################################
+#
+#  Name: update_hosts_file
+#  Purpose: update the hosts file with all nodes in EC2
+#  Author: Shane Kumpf
+#
+###################################################
+
+#
+# Base variables
+#
+SCRIPT_NAME=`basename $0`
+SCRIPT_DIR=`cd $(dirname $0) && pwd`
+SRC_DIR=$SCRIPT_DIR/${SCRIPT_NAME}.f
+
+#
+# Functions
+#
+function usage
+{
+    echo "Usage: $SCRIPT_NAME -n <node hostname>"
+    exit 1
+}
+
+#
+# Validation
+#
+if [ `id -un` != "ec2-user" ]; then
+    echo "ERROR: Must run as ec2-user"
+    exit 1
+fi
+
+#
+# Parse command line args
+#
+while getopts "n:" opt; do
+    case $opt in
+        n)
+            node=$OPTARG;;
+        \?)
+            echo "Invalid option: -$OPTARG"; usage;;
+    esac
+done
+
+if [ -z "$node" ]; then
+    usage
+fi
+
+#
+# Main
+#
+
+#
+# strip out all hadoop hosts
+#
+echo -e "\n#####  Removing all *.hadoop entires from /etc/hosts on $node"
+ec2-ssh $node "sudo sed -i '/.*hadoop.*/d' /etc/hosts" || exit 1
+echo "SUCCESS"
+
+# Get all hosts in this region, and add them to /etc/hosts
+echo -e "\n#####  Creating new /etc/hosts on $node"
+ec2-host-int | while read name intname; do
+    # Get the internal IP
+    intip=`host $intname | awk '{print $NF}'`
+    echo -e "Adding $intip\t${name}.hadoop $name to /etc/hosts on $node"
+    ec2-ssh -n $node "echo \"$intip	$name.hadoop $name\" | sudo -S tee -a /etc/hosts" || exit 1
+done
+echo -e "/etc/hosts contents on $node"
+ec2-ssh $node "cat /etc/hosts"
+
+exit 0

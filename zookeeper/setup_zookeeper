@@ -18,7 +18,7 @@ SCRIPT_DIR=`cd $(dirname $0) && pwd`
 #
 function usage
 {
-    echo "Usage: $SCRIPT_NAME -n <node name>"
+    echo "Usage: $SCRIPT_NAME -n <node name> -e \"<zookeeper1> [<zookeeper2>...]\""
     exit 1
 }
 
@@ -37,6 +37,8 @@ while getopts "n:" opt; do
     case $opt in
         n) 
             node=$OPTARG;;
+        e)
+            ensemble="$OPTARG";;
         \?) 
             echo "Invalid option: -$OPTARG"; usage;;
     esac
@@ -54,6 +56,8 @@ git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
 core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
+zk_conf_dir="$helpers_dir/configuration_files/zookeeper"
+zoo_cfg=$zk_conf_dir
 pkg_list="zookeeper openssl"
 
 #
@@ -124,6 +128,35 @@ ec2-ssh $node "sudo chmod -R 755 $HADOOP_CONF_DIR/" || exit 1
 echo "$HADOOP_CONF_DIR contents:"
 ec2-ssh $node "find $HADOOP_CONF_DIR/ -ls"
 echo "SUCCESS"
+
+# Setup the zookeeper config
+count=1
+for zk in $ensemble; do 
+    echo -e "\n#####  Setting server.$count to $zk in $zoo_cfg"
+    ec2-ssh $zk "sudo sed -i 's|.*server\.'$count'.*|server.'$count'='$zk':2888:3888|g' $zoo_cfg" || exit 1
+    count=$(( count + 1 ))
+done
+echo "$zoo_cfg contents:"
+cat $zoo_cfg
+echo "SUCCESS"
+
+# Set the data directory in the config
+echo -e "\n#####  Setting zookeeper data directory to: $ZOOKEEPER_DATA_DIR"
+ec2-ssh $node "sudo sed -i 's|.*dataDir.*|dataDir='$ZOOKEEPER_DATA_DIR'|g' $zoo_cfg" || exit 1
+echo "$zoo_cfg contents:"
+cat $zoo_cfg
+echo "SUCCESS"
+
+# Lay down zookeeper config
+echo -e "\n#####  Installing zookeeeper config to: $ZOOKEEPER_CONF_DIR"
+if [ -d $ZOOKEEPER_CONF_DIR ]; then
+    echo "Removing $ZOOKEEPER_CONF_DIR"
+    rm -rf $ZOOKEEPER_CONF_DIR || exit 1
+fi
+mkdir -p $ZOOKEEPER_CONF_DIR || exit 1
+ec2-ssh $node "sudo -u zookeeper cp $zk_conf_dir/* $ZOOKEEPER_CONF_DIR/"
+echo "$ZOOKEEPER_CONF_DIR contents:"
+ec2-ssh $node "sudo find $ZOOKEEPER_CONF_DIR -ls"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0
