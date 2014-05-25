@@ -51,7 +51,7 @@ fi
 #
 work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
-helpers_dir="$SCRIPT_PATH/../helpers"
+helpers_dir="$SCRIPT_DIR/../helpers"
 
 ls $helpers_dir
 
