@@ -1,8 +1,8 @@
 #!/bin/bash
 ###################################################
 #
-#  Name: setup_namenode
-#  Purpose: Initial namenode setup
+#  Name: setup_zookeeper
+#  Purpose: Initial zookeeper setup
 #  Author: Shane Kumpf
 #
 ###################################################
