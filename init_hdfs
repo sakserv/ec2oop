@@ -78,7 +78,7 @@ echo -e "\nStarting $SCRIPT_NAME at `date`"
 
 # format the namenode
 echo -e "\n#####  Formatting the namenode $nn"
-ec2-ssh $nn "sudo -u hdfs 'hadoop namenode -format'" || exit 1
+ec2-ssh $nn "sudo -u hdfs '/usr/lib/hadoop/bin/hadoop namenode -format'" || exit 1
 echo "SUCCESS"
 
 # start the PNN
