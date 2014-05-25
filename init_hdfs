@@ -77,26 +77,59 @@ source $helpers_dir/scripts/directories.sh
 echo -e "\nStarting $SCRIPT_NAME at `date`"
 
 # format the namenode
-echo -e "\n#####  Formatting the namenode $nn"
-ec2-ssh $nn "sudo -u hdfs /usr/bin/hdfs namenode -format" || exit 1
-echo "SUCCESS"
+is_formatted=""
+for dir_name in $DFS_NAME_DIR; do 
+    if ec2-ssh $nn "test -f $dir_name/in_use.lock"; then
+        is_formatted="true"
+    fi
+done
+if [ -z "$is_formatted" ]; then 
+    echo -e "\n#####  Formatting the namenode $nn"
+    ec2-ssh $nn "sudo -u hdfs /usr/bin/hdfs namenode -format" || exit 1
+    echo "SUCCESS"
+else
+    echo -e "\n#####  Skipping format, namenode $nn already formatted"
+fi
 
 # start the PNN
 echo -e "\n#####  Starting the namenode $nn"
-ec2-ssh $nn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start namenode" || exit 1
+if ! ec2-ssh $nn "ps -ef | grep -v grep | grep -q proc_namenode"; then
+    ec2-ssh $nn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start namenode" || exit 1
+else
+    echo -e "\n#####  Skipping start, namenode $nn already running"
+fi
 echo "SUCCESS"
 
 # start the SNN
 echo -e "\n#####  Starting the secondary namenode $snn"
-ec2-ssh $snn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start secondarynamenode" || exit 1
+if ! ec2-ssh $snn "ps -ef | grep -v grep | grep -q proc_secondarynamenode"; then
+    ec2-ssh $snn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start secondarynamenode" || exit 1
+else
+    echo -e "\n#####  Skipping start, secondary namenode $snn already running"
+fi
 echo "SUCCESS"
 
 # start the datanodes
 for dn in $dn_list; do
     echo -e "\n#####  Starting the datanode $dn"
-    ec2-ssh $dn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start datanode" || exit 1
+    if ! ec2-ssh $dn "ps -ef | grep -v grep | grep -q proc_datanode"; then
+        ec2-ssh $dn "sudo -u hdfs /usr/lib/hadoop/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR start datanode" || exit 1
+    else
+        echo -e "\n#####  Skipping start, datanode $dn already running"
+    fi
     echo "SUCCESS"
 done
+
+# Create the hdfs /tmp dir and change perms
+echo -e "\n#####  Creating the HDFS /tmp dir"
+sudo -u hdfs hdfs dfs -mkdir -p /tmp || exit 1
+sudo -u hdfs hdfs dfs -chmod 1777 /tmp || exit 1
+echo "SUCCESS"
+
+# Show the contents of HDFS /
+echo -e "\n#####  Listing HDFS / contents"
+sudo -u hdfs hdfs dfs -ls / || exit 1
+echo "SUCCESS"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0
