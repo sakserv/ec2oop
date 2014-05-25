@@ -113,7 +113,7 @@ done
 for dir_name in $dn_dirs_to_create; do
     echo -e "\n#####  Creating directory $dir_name on $node"
     ec2-ssh $node "sudo mkdir -p $dir_name" || exit 1
-    ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $dir_name" || exit 1
+    ec2-ssh $node "sudo chown -R $dn_dirs_user:$dn_dirs_group $dir_name" || exit 1
     ec2-ssh $node "sudo chmod -R 755 $dir_name" || exit 1
     echo "$dir_name contents:"
     ec2-ssh $node "find $dir_name -ls"
@@ -124,7 +124,7 @@ done
 for dir_name in $nm_dirs_to_create; do
     echo -e "\n#####  Creating directory $dir_name on $node"
     ec2-ssh $node "sudo mkdir -p $dir_name" || exit 1
-    ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $dir_name" || exit 1
+    ec2-ssh $node "sudo chown -R $nm_dirs_user:$nm_dirs_group $dir_name" || exit 1
     ec2-ssh $node "sudo chmod -R 755 $dir_name" || exit 1
     echo "$dir_name contents:"
     ec2-ssh $node "find $dir_name -ls"
