@@ -6,7 +6,7 @@
   </property>
     <property>
     <name>yarn.nodemanager.local-dirs</name>
-    <value>TODO-YARN-LOCAL-DIR</value>
+    <value>/data/01/yarn/nm,/data/02/yarn/nm</value>
   </property>
     <property>
     <name>yarn.nodemanager.container-monitor.interval-ms</name>
@@ -26,11 +26,11 @@
   </property>
     <property>
     <name>yarn.log.server.url</name>
-    <value>TODO-RMNODE-HOSTNAME:19888/jobhistory/logs</value>
+    <value>resourcemanager.hadoop:19888/jobhistory/logs</value>
   </property>
     <property>
     <name>yarn.resourcemanager.admin.address</name>
-    <value>TODO-RMNODE-HOSTNAME:8141</value>
+    <value>resourcemanager.hadoop:8141</value>
   </property>
     <property>
     <name>yarn.scheduler.maximum-allocation-mb</name>
@@ -54,7 +54,7 @@
   </property>
     <property>
     <name>yarn.nodemanager.log-dirs</name>
-    <value>TODO-YARN-LOCAL-LOG-DIR</value>
+    <value>/data/01/yarn/logs,/data/02/yarn/logs</value>
   </property>
     <property>
     <name>yarn.nodemanager.log.retain-second</name>
@@ -66,7 +66,7 @@
   </property>
     <property>
     <name>yarn.resourcemanager.resource-tracker.address</name>
-    <value>TODO-RMNODE-HOSTNAME:8025</value>
+    <value>resourcemanager.hadoop:8025</value>
   </property>
     <property>
     <name>yarn.application.classpath</name>
@@ -102,7 +102,7 @@
   </property>
     <property>
     <name>yarn.resourcemanager.webapp.address</name>
-    <value>TODO-RMNODE-HOSTNAME:8088</value>
+    <value>resourcemanager.hadoop:8088</value>
   </property>
     <property>
     <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
@@ -110,7 +110,7 @@
   </property>
     <property>
     <name>yarn.resourcemanager.address</name>
-    <value>TODO-RMNODE-HOSTNAME:8050</value>
+    <value>resourcemanager.hadoop:8050</value>
   </property>
     <property>
     <name>yarn.nodemanager.admin-env</name>
@@ -126,6 +126,6 @@
   </property>
     <property>
     <name>yarn.resourcemanager.scheduler.address</name>
-    <value>TODO-RMNODE-HOSTNAME:8030</value>
+    <value>resourcemanager.hadoop:8030</value>
   </property>
   </configuration>

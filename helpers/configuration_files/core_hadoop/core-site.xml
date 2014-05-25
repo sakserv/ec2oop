@@ -6,7 +6,7 @@
   </property>
     <property>
     <name>dfs.namenode.checkpoint.dir</name>
-    <value>/hadoop/hdfs/namesecondary</value>
+    <value>/data/dfs/checkpoint</value>
   </property>
     <property>
     <name>hadoop.security.authentication</name>
@@ -18,7 +18,7 @@
   </property>
     <property>
     <name>fs.checkpoint.edits.dir</name>
-    <value>/hadoop/hdfs/namesecondary</value>
+    <value>/data/dfs/checkpoint/edits</value>
   </property>
     <property>
     <name>hadoop.proxyuser.hive.groups</name>
@@ -73,7 +73,7 @@
   </property>
     <property>
     <name>fs.defaultFS</name>
-    <value>hdfs://TODO-NAMENODE-HOSTNAME:PORT</value>
+    <value>hdfs://namenode.hadoop:8020</value>
   </property>
     <property>
     <name>mapreduce.jobtracker.webinterface.trusted</name>
