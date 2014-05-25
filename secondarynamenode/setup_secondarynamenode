@@ -116,5 +116,15 @@ for dir_name in $dirs_to_create; do
     echo "SUCCESS"
 done
 
+# Copy core hadoop config to $HADOOP_CONF_DIR
+echo -e "\n#####  Copying core hadoop config from $core_conf_dir to $HADOOP_CONF_DIR"
+ec2-ssh $node "sudo cp -Rp $core_conf_dir/* $HADOOP_CONF_DIR/" || exit 1
+ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $HADOOP_CONF_DIR/" || exit 1
+ec2-ssh $node "sudo chmod -R 755 $HADOOP_CONF_DIR/" || exit 1
+echo "$HADOOP_CONF_DIR contents:"
+ec2-ssh $node "find $HADOOP_CONF_DIR/ -ls"
+echo "SUCCESS"
+
+
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0
