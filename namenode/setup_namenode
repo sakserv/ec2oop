@@ -53,7 +53,12 @@ work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 helpers_dir="$SCRIPT_DIR/../helpers"
 
-ls $helpers_dir
+#
+# Source helpers
+#
+source $helpers_dir/scripts/usersAndGroups.sh
+source $helpers_dir/scripts/directories.sh
+
 
 #
 # Main
