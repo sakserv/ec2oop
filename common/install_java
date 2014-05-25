@@ -1,0 +1,75 @@
+#!/bin/bash
+###################################################
+#
+#  Name: install_java
+#  Purpose: Installs java and sets env vars
+#  Author: Shane Kumpf
+#
+###################################################
+
+#
+# Base variables
+#
+SCRIPT_NAME=`basename $0`
+SCRIPT_DIR=`cd $(dirname $0) && pwd`
+
+#
+# Functions
+#
+function usage
+{
+    echo "Usage: $SCRIPT_NAME"
+    exit 1
+}
+
+#
+# Validation
+#
+if [ `id -un` != "ec2-user" ]; then
+    echo "ERROR: Must run as ec2-user"
+    exit 1
+fi
+
+#
+# Variables
+#
+jvm_inst_base="/usr/lib/jvm"
+java_home_profile_script="/etc/profile.d/java_home.sh"
+
+#
+# Main
+#
+echo -e "\nStarting $SCRIPT_NAME at `date`"
+
+
+# Install the packages
+echo -e "\n#####  Installing OpenJDK 1.7"
+sudo yum install -y java-1.7.0-openjdk java-1.7.0-openjdk-devel || exit 1
+echo "SUCCESS"
+
+# locate the latest java install
+echo -e "\n#####  Getting path to latest java install"
+java_version_path=$(find $jvm_inst_base/* -type d -prune | grep 1.7)
+if [ -z "$java_version_path" ]; then
+    echo "ERROR: could not determine java path"
+    exit 1
+else
+    echo "Java path is: $java_version_path"
+fi
+echo "SUCCESS"
+
+# Create the profile.d script for setting java_home
+echo -e "\n#####  Setting JAVA_HOME globally"
+if [ -f "$java_home_profile_script" ]; then
+    sudo rm $java_home_profile_script || exit 1
+fi
+echo 'export JAVA_HOME='$java_version_path'' | sudo tee -a $java_home_profile_script
+echo 'export PATH=$JAVA_HOME/bin:$PATH'  | sudo tee -a $java_home_profile_script
+sudo chmod 775 $java_home_profile_script || exit 1
+source $java_home_profile_script || exit 1
+echo "JAVA_HOME is: $JAVA_HOME"
+echo "PATH is: $PATH"
+echo "SUCCESS"
+
+echo -e "\nFinished $SCRIPT_NAME at `date`"
+exit 0

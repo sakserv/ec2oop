@@ -1,0 +1,51 @@
+#!/bin/bash
+###################################################
+#
+#  Name: install_base_hadoop_pkgs
+#  Purpose: Installs the common hadoop components
+#  Author: Shane Kumpf
+#
+###################################################
+
+#
+# Base variables
+#
+SCRIPT_NAME=`basename $0`
+SCRIPT_DIR=`cd $(dirname $0) && pwd`
+
+#
+# Functions
+#
+function usage
+{
+    echo "Usage: $SCRIPT_NAME"
+    exit 1
+}
+
+#
+# Validation
+#
+if [ `id -un` != "ec2-user" ]; then
+    echo "ERROR: Must run as ec2-user"
+    exit 1
+fi
+
+#
+# Variables
+#
+pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl"
+
+#
+# Main
+#
+echo -e "\nStarting $SCRIPT_NAME at `date`"
+
+# Install the packages
+for pkg in $pkg_list; do
+    echo -e "\n#####  Installing $pkg"
+    sudo yum install -y $pkg || exit 1
+    echo "SUCCESS"
+done
+
+echo -e "\nFinished $SCRIPT_NAME at `date`"
+exit 0
