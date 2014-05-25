@@ -53,12 +53,16 @@ work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
+pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-client openssl"
+dirs_user="$HDFS_USER"
+dirs_group="$HADOOP_GROUP"
 
 #
 # Source helpers
 #
 source $helpers_dir/scripts/usersAndGroups.sh
 source $helpers_dir/scripts/directories.sh
+dirs_to_create="$FS_CHECKPOINT_DIR $HDFS_LOG_DIR $HDFS_PID_DIR"
 
 #
 # Main
@@ -93,16 +97,18 @@ echo -e "\n#####  Installing Java"
 ec2-ssh $node "$common_dir/install_java" || exit 1
 echo "SUCCESS"
 
-# Install base packages
-echo -e "\n#####  Installing base Hadoop packages"
-ec2-ssh $node "$common_dir/install_base_hadoop_pkgs" || exit 1
-echo "SUCCESS"
+# Install Hadoop packages
+for pkg in $pkg_list; do
+    echo -e "\n#####  Installing $pkg"
+    sudo yum install -y $pkg || exit 1
+    echo "SUCCESS"
+done
 
-# Create namenode directories
-for dir_name in $FS_CHECKPOINT_DIR; do
+# Create needed directories
+for dir_name in $dirs_to_create; do
     echo -e "\n#####  Creating directory $dir_name on $node"
     ec2-ssh $node "sudo mkdir -p $dir_name" || exit 1
-    ec2-ssh $node "sudo chown -R $HDFS_USER:$HADOOP_GROUP $dir_name" || exit 1
+    ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $dir_name" || exit 1
     ec2-ssh $node "sudo chmod -R 755 $dir_name" || exit 1
     echo "$dir_name contents:"
     ec2-ssh $node "find $dir_name -ls"
