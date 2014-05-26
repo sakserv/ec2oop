@@ -105,9 +105,9 @@ sudo -u hdfs hdfs dfs -mkdir -p /apps/hive/warehouse || exit 1
 sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /apps || exit 1
 sudo -u hdfs hdfs dfs -chmod 775 /apps || exit 1
 sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /apps/hive || exit 1
-sudo -u hdfs hdfs dfs -chmod 775 /apps/hive || exit 1
+sudo -u hdfs hdfs dfs -chmod 777 /apps/hive || exit 1
 sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /apps/hive/warehouse || exit 1
-sudo -u hdfs hdfs dfs -chmod 775 /apps/hive/warehouse || exit 1
+sudo -u hdfs hdfs dfs -chmod 777 /apps/hive/warehouse || exit 1
 sudo -u hdfs hdfs dfs -ls -R /apps || exit 1
 # Hive scratch
 sudo -u hdfs hdfs dfs -mkdir -p /tmp/scratch || exit 1
