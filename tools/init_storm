@@ -153,6 +153,7 @@ ec2-ssh $node "sudo find /etc/storm/conf/" || exit 1
 echo "SUCCESS"
 
 # Adding profile.d script for storm-yarn
+echo -e "\n#####  Adding /etc/profile.d/storm-yarn.sh"
 if ec2-ssh $node "test -f /etc/profile.d/storm-yarn.sh"; then
     echo "Removing /etc/profile.d/storm-yarn.sh on $node"
     ec2-ssh $node "sudo rm /etc/profile.d/storm-yarn.sh" || exit 1
