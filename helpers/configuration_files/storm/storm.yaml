@@ -15,12 +15,15 @@
 # limitations under the License.
 
 ########### These MUST be filled in for a storm configuration
-storm.zookeeper.servers:
-     - "zookeeper1.hadoop"
-#     - "server2"
-# 
-# nimbus.host: "nimbus"
-# 
+ storm.zookeeper.servers:
+    - "zookeeper1.hadoop"
+ nimbus.host: "nimbus.hadoop"
+ ui.port: 8080 
+ supervisor.slots.ports:
+    - 6700
+    - 6701
+    - 6702
+    - 6703
 # 
 # ##### These may optionally be filled in:
 #    
