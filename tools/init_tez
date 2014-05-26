@@ -97,7 +97,7 @@ echo "SUCCESS"
 echo -e "\n#####  Copying the hive libs needed by tez into HDFS"
 set -x
 sudo -u hdfs hdfs dfs -mkdir -p /apps/hive/install || exit 1
-sudo -u hdfs hdfs dfs -copyFromLocal /usr/lib/hive/lib/hive-exec-* /apps/hive/install/ || exit 1
+sudo -u hdfs hdfs dfs -copyFromLocal /usr/lib/hive/lib/hive-exec-* /apps/hive/install/hive-exec-0.13.0.jar || exit 1
 sudo -u hdfs hdfs dfs -chown -R hive:hadoop /apps/hive || exit 1
 set +x
 echo "SUCCESS"
