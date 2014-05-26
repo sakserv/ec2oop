@@ -137,5 +137,18 @@ ec2-ssh $node "sudo cp $hive_conf_dir/* $HIVE_CONF_DIR/" || exit 1
 echo "$HIVE_CONF_DIR contents:"
 ec2-ssh $node "sudo find $HIVE_CONF_DIR -ls"
 
+# Lay down tez config
+echo -e "\n#####  Installing tez config to: $TEZ_CONF_DIR"
+if ec2-ssh $node "test -d $TEZ_CONF_DIR"; then
+    echo "Removing $TEZ_CONF_DIR"
+    ec2-ssh $node "sudo rm -rf $TEZ_CONF_DIR" || exit 1
+fi
+# make the new conf dir and copy over the configs
+ec2-ssh $node "sudo mkdir -p $TEZ_CONF_DIR" || exit 1
+ec2-ssh $node "sudo cp $tez_conf_dir/* $TEZ_CONF_DIR/" || exit 1
+echo "$TEZ_CONF_DIR contents:"
+ec2-ssh $node "sudo find $TEZ_CONF_DIR -ls"
+
+
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0

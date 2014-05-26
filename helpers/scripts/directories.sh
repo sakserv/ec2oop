@@ -163,4 +163,5 @@ TEZ_CONF_DIR="/etc/tez/conf"
 
 TEZ_HOME_DIR="/usr/lib/tez"
 
+TEZ_JARS="/usr/lib/tez/*:/usr/lib/tez/lib/*"
 export HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec

@@ -115,5 +115,10 @@ done
 MAPREDUCE_LIBS=/usr/lib/hadoop-mapreduce/*
 export HADOOP_CLASSPATH=${HADOOP_CLASSPATH}${JAVA_JDBC_LIBS}:${MAPREDUCE_LIBS}
 
+if [ -n "$TEZ_CONF_DIR" ]; then
+    export HADOOP_CLASSPATH=$TEZ_CONF_DIR:$TEZ_JARS:$HADOOP_CLASSPATH
+fi
+  
+
 # Setting path to hdfs command line
 export HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec
