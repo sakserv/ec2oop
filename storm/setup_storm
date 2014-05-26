@@ -116,6 +116,10 @@ echo "SUCCESS"
 #
 source $helpers_dir/scripts/usersAndGroups.sh
 source $helpers_dir/scripts/directories.sh
+STORM_LOCAL_DIR="/data/01/storm"
+dirs_to_create="$STORM_LOCAL_DIR"
+dirs_user="storm"
+dirs_group="storm"
 
 #
 # Main
@@ -138,6 +142,18 @@ for pkg in $pkg_list; do
     ec2-ssh $node "sudo yum install -y $pkg" || exit 1
     echo "SUCCESS"
 done
+
+# Create needed directories
+for dir_name in $dirs_to_create; do
+    echo -e "\n#####  Creating directory $dir_name on $node"
+    ec2-ssh $node "sudo mkdir -p $dir_name" || exit 1
+    ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $dir_name" || exit 1
+    ec2-ssh $node "sudo chmod -R 755 $dir_name" || exit 1
+    echo "$dir_name contents:"
+    ec2-ssh $node "find $dir_name -ls"
+    echo "SUCCESS"
+done
+
 
 # Copy core hadoop config to $HADOOP_CONF_DIR
 echo -e "\n#####  Copying core hadoop config from $core_conf_dir to $HADOOP_CONF_DIR"
