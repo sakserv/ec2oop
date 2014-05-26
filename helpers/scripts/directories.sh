@@ -72,6 +72,9 @@ HIVE_LOG_DIR="/var/log/hive";
 # Directory to store the Hive process ID.
 HIVE_PID_DIR="/var/run/hive";
 
+# Directory where Hive is installed
+HIVE_HOME="/usr/lib/hive";
+
 #
 # Hadoop Service - WebHCat (Templeton)
 #

@@ -147,7 +147,7 @@ ec2-ssh $node "sudo service mysqld start" || exit 1
 echo "Creating the root account"
 ec2-ssh $node "sudo mysqladmin -u root --password=mysql password 'mysql'" || exit 1
 echo "Creating the hive account"
-ec2-ssh $node "sudo mysql -u root --password=mysql -f $hive_conf_dir/grants.sql" || exit 1
+ec2-ssh $node "sudo mysql -u root --password=mysql < $hive_conf_dir/grants.sql" || exit 1
 
 # Initialize the schema
 echo -e "\n#####  Installing hive database schema on $node"
