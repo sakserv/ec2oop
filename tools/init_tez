@@ -58,6 +58,7 @@ tez_profile_script="/etc/profile.d/tez.sh"
 #
 source $helpers_dir/scripts/usersAndGroups.sh
 source $helpers_dir/scripts/directories.sh
+env
 
 #
 # Main
@@ -70,8 +71,8 @@ if ec2-ssh $tez "test -f $tez_profile_script"; then
     ec2-ssh $tez "sudo rm $tez_profile_script" || exit 1
 fi
 
-ec2-ssh $tez "echo 'export TEZ_CONF_DIR=$TEZ_CONF_DIR' | sudo tee -a $tez_profile_script" || exit 1
-ec2-ssh $tez "echo 'export TEZ_JARS=$TEZ_JARS' | sudo tee -a $tez_profile_script" || exit 1
+ec2-ssh $tez "echo 'export TEZ_CONF_DIR='$TEZ_CONF_DIR'' | sudo tee -a $tez_profile_script" || exit 1
+ec2-ssh $tez "echo 'export TEZ_JARS='$TEZ_JARS'' | sudo tee -a $tez_profile_script" || exit 1
 ec2-ssh $tez "sudo chmod 775 $tez_profile_script" || exit 1
 echo "$tez_profile_script contents on $tez:"
 ec2-ssh $tez "cat $tez_profile_script" || exit 1
