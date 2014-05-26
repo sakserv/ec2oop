@@ -49,6 +49,8 @@ fi
 #
 # Variables
 #
+echo "SUCCESS"
+echo "SUCCESS"
 work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
 git_ec2_tools_url=" https://github.com/sakserv/ec2-tools"
