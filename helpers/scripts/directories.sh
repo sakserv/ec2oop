@@ -83,7 +83,7 @@ HIVE_HOME="/usr/lib/hive";
 WEBHCAT_CONF_DIR="/etc/hcatalog/conf/webhcat";
 
 # Directory to store the WebHCat (Templeton) logs.
-WEBHCAT_LOG_DIR="var/log/webhcat";
+WEBHCAT_LOG_DIR="/var/log/webhcat";
 
 # Directory to store the WebHCat (Templeton) process ID.
 WEBHCAT_PID_DIR="/var/run/webhcat";

@@ -1,0 +1,142 @@
+#!/bin/bash
+###################################################
+#
+#  Name: setup_webhcat
+#  Purpose: Initial webhcat setup
+#  Author: Shane Kumpf
+#
+###################################################
+
+#
+# Base variables
+#
+SCRIPT_NAME=`basename $0`
+SCRIPT_DIR=`cd $(dirname $0) && pwd`
+
+#
+# Functions
+#
+function usage
+{
+    echo "Usage: $SCRIPT_NAME -n <node name>"
+    exit 1
+}
+
+#
+# Validation
+#
+if [ `id -un` != "ec2-user" ]; then
+    echo "ERROR: Must run as ec2-user"
+    exit 1
+fi
+
+#
+# Parse command line args
+#
+while getopts "n:" opt; do
+    case $opt in
+        n) 
+            node=$OPTARG;;
+        \?) 
+            echo "Invalid option: -$OPTARG"; usage;;
+    esac
+done
+
+if [ -z "$node" ]; then
+    usage
+fi
+
+#
+# Variables
+#
+work_dir="/tmp/work"
+git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
+helpers_dir="$work_dir/ec2oop/helpers"
+common_dir="$work_dir/ec2oop/common"
+core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
+webhcat_conf_dir="$helpers_dir/configuration_files/webhcat"
+pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl hive-hcatalog hive-webhcat webhcat-tar-hive webhcat-tar-pig"
+
+#
+# Source helpers
+#
+source $helpers_dir/scripts/usersAndGroups.sh
+source $helpers_dir/scripts/directories.sh
+dirs_to_create="$WEBHCAT_LOG_DIR $WEBHCAT_CONF_DIR $WEBHCAT_PID_DIR"
+dirs_user="$HIVE_USER"
+dirs_group="$HADOOP_GROUP"
+
+#
+# Main
+#
+echo -e "\nStarting $SCRIPT_NAME at `date`"
+
+# Setup work dir on remote node
+echo -e "\n#####  Setup work_dir on remote node"
+ec2-ssh $node "test -d $work_dir"
+if [ $? -eq 0 ]; then
+    echo "Removing and recreating $work_dir on $node"
+    ec2-ssh $node "rm -rf $work_dir && mkdir -p $work_dir" || exit 1
+    echo "SUCCESS"
+else
+    echo "Creating $work_dir on $node"
+    ec2-ssh $node "mkdir -p $work_dir" || exit 1
+    echo "SUCCESS"
+fi
+
+# pull down ec2oop repo on remote node
+echo -e "\n#####  Pulling repo $git_ec2oop_url on $node"
+ec2-ssh $node "cd $work_dir && git clone $git_ec2oop_url" || exit 1
+echo "SUCCESS"
+
+# Add yum repos
+echo -e "\n#####  Adding yum repos"
+ec2-ssh $node "$common_dir/add_yum_repos" || exit 1
+echo "SUCCESS"
+
+# Install java
+echo -e "\n#####  Installing Java"
+ec2-ssh $node "$common_dir/install_java" || exit 1
+echo "SUCCESS"
+
+# Install Hadoop packages
+for pkg in $pkg_list; do
+    echo -e "\n#####  Installing $pkg on $node"
+    ec2-ssh $node "sudo yum install -y $pkg" || exit 1
+    echo "SUCCESS"
+done
+
+# Create needed directories
+for dir_name in $dirs_to_create; do
+    echo -e "\n#####  Creating directory $dir_name on $node"
+    ec2-ssh $node "sudo mkdir -p $dir_name" || exit 1
+    ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $dir_name" || exit 1
+    ec2-ssh $node "sudo chmod -R 755 $dir_name" || exit 1
+    echo "$dir_name contents:"
+    ec2-ssh $node "find $dir_name -ls"
+    echo "SUCCESS"
+done
+
+# Copy core hadoop config to $HADOOP_CONF_DIR
+echo -e "\n#####  Copying core hadoop config from $core_conf_dir to $HADOOP_CONF_DIR"
+ec2-ssh $node "sudo cp -Rp $core_conf_dir/* $HADOOP_CONF_DIR/" || exit 1
+ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $HADOOP_CONF_DIR/" || exit 1
+ec2-ssh $node "sudo chmod -R 755 $HADOOP_CONF_DIR/" || exit 1
+echo "$HADOOP_CONF_DIR contents:"
+ec2-ssh $node "find $HADOOP_CONF_DIR/ -ls"
+echo "SUCCESS"
+
+# Lay down webhcat config
+echo -e "\n#####  Installing hive config to: $WEBHCAT_CONF_DIR"
+if ec2-ssh $node "test -d $WEBHCAT_CONF_DIR"; then
+    echo "Removing $WEBHCAT_CONF_DIR"
+    ec2-ssh $node "sudo rm -rf $WEBHCAT_CONF_DIR" || exit 1
+fi
+# make the new conf dir and copy over the configs
+ec2-ssh $node "sudo mkdir -p $WEBHCAT_CONF_DIR" || exit 1
+ec2-ssh $node "sudo cp $webhcat_conf_dir/* $WEBHCAT_CONF_DIR/" || exit 1
+echo "$WEBHCAT_CONF_DIR contents:"
+ec2-ssh $node "sudo find $WEBHCAT_CONF_DIR -ls"
+
+echo -e "\nFinished $SCRIPT_NAME at `date`"
+exit 0
