@@ -159,7 +159,10 @@ if [ $? -ne 0 ]; then
     ec2-ssh $node "sudo mysqladmin -u root --password=mysql password 'mysql'" || exit 1
 fi
 echo "Creating the hive account"
-ec2-ssh $node "sudo mysql -u root --password=mysql < $hive_conf_dir/grants.sql" || exit 1
+ec2-ssh $node "sudo mysql -u root --password=mysql < $hive_conf_dir/create_user_grants.sql" 
+if [ $? -ne 0 ]; then
+    ec2-ssh $node "sudo mysql -u root --password=mysql < $hive_conf_dir/grants.sql" || exit 1
+fi
 
 # Initialize the schema
 echo -e "\n#####  Installing hive database schema on $node"
