@@ -112,7 +112,7 @@ echo -e "\n#####  Starting the resourcemanager $resm"
 if ! ec2-ssh $resm "ps -ef | grep -v grep | grep -q proc_resourcemanager"; then
     ec2-ssh $resm "sudo -u yarn HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec /usr/lib/hadoop-yarn/sbin/yarn-daemon.sh --config $HADOOP_CONF_DIR start resourcemanager" || exit 1
 else
-    echo -e "Skipping start, resourcemanager $rm already running"
+    echo "Skipping start, resourcemanager $rm already running"
 fi
 echo "SUCCESS"
 
@@ -128,7 +128,7 @@ for nm in $nm_list; do
     if ! ec2-ssh $nm "ps -ef | grep -v grep | grep -q proc_nodemanager"; then
         ec2-ssh $nm "sudo -u yarn HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec /usr/lib/hadoop-yarn/sbin/yarn-daemon.sh --config $HADOOP_CONF_DIR start nodemanager" || exit 1
     else
-        echo -e "Skipping start, nodemanager $nm already running"
+        echo "Skipping start, nodemanager $nm already running"
     fi
     echo "SUCCESS"
 

@@ -112,7 +112,7 @@ for zk in $zk_list; do
     if ! ec2-ssh $zk "ps -ef | grep -v grep | grep -q QuorumPeerMain"; then
         ec2-ssh $zk "sudo -u zookeeper ZOOCFGDIR=/etc/zookeeper/conf /usr/lib/zookeeper/bin/zkServer.sh start | sudo -u zookeeper tee /var/log/zookeeper/zoo.out 2>&1" || exit 1
     else
-        echo -e "\n#####  Skipping start, zookeeper node $zk already running"
+        echo "Skipping start, zookeeper node $zk already running"
     fi
 done
 echo "SUCCESS"
