@@ -51,12 +51,39 @@ fi
 #
 work_dir="/tmp/work"
 git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
+git_ec2_tools_url=" https://github.com/sakserv/ec2-tools"
 helpers_dir="$work_dir/ec2oop/helpers"
 common_dir="$work_dir/ec2oop/common"
 core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
 hive_conf_dir="$helpers_dir/configuration_files/hive"
 tez_conf_dir="$helpers_dir/configuration_files/tez"
 pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl hive hive-hcatalog tez"
+
+#
+# Prep work dir
+#
+if [ -d "$work_dir" ]; then
+    echo -e "\n#####  Cleaning up previous work directory $work_dir"
+    rm -rf $work_dir || exit 1
+    echo "SUCCESS"
+fi
+
+# Create new work dir
+if [ ! -d "$work_dir" ]; then
+    echo -e "\n#####  Creating work directory $work_dir"
+    mkdir -p $work_dir || exit 1
+    echo "SUCCESS"
+fi
+
+# git clone ec2-tools into work dir
+echo -e "\n#####  Cloning ec2-tools repo"
+(cd $work_dir && git clone $git_ec2_tools_url) || exit 1
+echo "SUCCESS"
+
+# git clone ec2oop into work dir
+echo -e "\n#####  Pulling repo $git_ec2oop_url to $work_dir"
+(cd $work_dir && git clone $git_ec2oop_url) || exit 1
+echo "SUCCESS"
 
 #
 # Source helpers
@@ -71,24 +98,6 @@ dirs_group="$HADOOP_GROUP"
 # Main
 #
 echo -e "\nStarting $SCRIPT_NAME at `date`"
-
-# Setup work dir on remote node
-echo -e "\n#####  Setup work_dir on remote node"
-ec2-ssh $node "test -d $work_dir"
-if [ $? -eq 0 ]; then
-    echo "Removing and recreating $work_dir on $node"
-    ec2-ssh $node "rm -rf $work_dir && mkdir -p $work_dir" || exit 1
-    echo "SUCCESS"
-else
-    echo "Creating $work_dir on $node"
-    ec2-ssh $node "mkdir -p $work_dir" || exit 1
-    echo "SUCCESS"
-fi
-
-# pull down ec2oop repo on remote node
-echo -e "\n#####  Pulling repo $git_ec2oop_url on $node"
-ec2-ssh $node "cd $work_dir && git clone $git_ec2oop_url" || exit 1
-echo "SUCCESS"
 
 # Add yum repos
 echo -e "\n#####  Adding yum repos"
