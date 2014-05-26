@@ -33,9 +33,9 @@ fi
 #
 # Parse command line args
 #
-while getopts "j:" opt; do
+while getopts "n:" opt; do
     case $opt in
-        j) 
+        n) 
             jhs=$OPTARG;;
         \?) 
             echo "Invalid option: -$OPTARG"; usage;;
