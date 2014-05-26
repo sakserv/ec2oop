@@ -50,7 +50,7 @@
   </property>
     <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
-    <value>3096</value>
+    <value>4096</value>
   </property>
     <property>
     <name>yarn.nodemanager.log-dirs</name>
