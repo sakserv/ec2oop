@@ -122,7 +122,7 @@ echo "SUCCESS"
 # start the metastore
 echo -e "\n#####  Starting the metastore on $hive"
 if ! ec2-ssh $hive "ps -ef | grep -v grep | grep -q HiveMetaStore"; then
-    bash -x ec2-ssh $hive "sudo -u hive echo 'hive --service metastore 2>&1 | sudo -u hive tee '$HIVE_LOG_DIR'/hivemetastore.out' | at now" || exit 1
+    ec2-ssh $hive "sudo -u hive echo 'hive --service metastore 2>&1 | sudo -u hive tee '$HIVE_LOG_DIR'/hivemetastore.out' | at now" || exit 1
 else
     echo "Skipping start, metastore on $hive already running"
 fi
@@ -131,7 +131,7 @@ echo "SUCCESS"
 # start hiveserver 2
 echo -e "\n#####  Starting hiveserver2 on $hive"
 if ! ec2-ssh $hive "ps -ef | grep -v grep | grep -qi HiveServer2"; then
-    bash -x ec2-ssh $hive "sudo -u hive echo '/usr/lib/hive/bin/hiveserver2 2>&1 | sudo -u hive tee '$HIVE_LOG_DIR'/hiveserver2.out' | at now" || exit 1
+    ec2-ssh $hive "sudo -u hive echo '/usr/lib/hive/bin/hiveserver2 2>&1 | sudo -u hive tee '$HIVE_LOG_DIR'/hiveserver2.out' | at now" || exit 1
 else
     echo "Skipping start, hiveserver2 on $hive already running"
 fi
