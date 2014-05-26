@@ -105,7 +105,7 @@ echo "SUCCESS"
 
 # start the JHS
 echo -e "\n#####  Starting the jobhistoryserver $jhs"
-if ! ec2-ssh $jhs "ps -ef | grep -v grep | grep -q proc_jobhistory"; then
+if ! ec2-ssh $jhs "ps -ef | grep -v grep | grep -q proc_historyserver"; then
     ec2-ssh $jhs "sudo -u mapred HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec/ /usr/lib/hadoop-mapreduce/sbin/mr-jobhistory-daemon.sh --config $HADOOP_CONF_DIR start historyserver" || exit 1
 else
     echo -e "\n#####  Skipping start, jobhistoryserver $jhs already running"
