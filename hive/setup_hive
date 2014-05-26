@@ -154,7 +154,10 @@ echo "Starting mysql"
 ec2-ssh $node "sudo chkconfig mysqld on" || exit 1
 ec2-ssh $node "sudo service mysqld start" || exit 1
 echo "Creating the root account"
-ec2-ssh $node "sudo mysqladmin -u root --password=mysql password 'mysql'" || exit 1
+ec2-ssh $node "sudo mysqladmin -u root password 'mysql'" 
+if [ $? -ne 0 ]; then
+    ec2-ssh $node "sudo mysqladmin -u root --password=mysql password 'mysql'" || exit 1
+fi
 echo "Creating the hive account"
 ec2-ssh $node "sudo mysql -u root --password=mysql < $hive_conf_dir/grants.sql" || exit 1
 
