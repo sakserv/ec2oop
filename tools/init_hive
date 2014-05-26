@@ -66,25 +66,33 @@ echo -e "\nStarting $SCRIPT_NAME at `date`"
 # Create the hive user and warehouse dirs
 echo -e "\n#####  Creating the hive user and warehouse directories"
 # Hive User
+set -x
 sudo -u hdfs hdfs dfs -mkdir -p /user/hive || exit 1
 sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /user/hive || exit 1
+sudo -u hdfs hdfs dfs -ls /user | grep hive || exit 1
 # Hive warehouse
 sudo -u hdfs hdfs dfs -mkdir -p /apps/hive/warehouse || exit 1
+sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /apps || exit 1
+sudo -u hdfs hdfs dfs -chmod 775 /apps || exit 1
 sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /apps/hive || exit 1
 sudo -u hdfs hdfs dfs -chmod 775 /apps/hive || exit 1
 sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /apps/hive/warehouse || exit 1
 sudo -u hdfs hdfs dfs -chmod 775 /apps/hive/warehouse || exit 1
+sudo -u hdfs hdfs dfs -ls -R /apps || exit 1
 # Hive scratch
 sudo -u hdfs hdfs dfs -mkdir -p /tmp/scratch || exit 1
 sudo -u hdfs hdfs dfs -chown $HIVE_USER:$HADOOP_GROUP /tmp/scratch || exit 1
 sudo -u hdfs hdfs dfs -chmod 777 /tmp/scratch || exit 1
+sudo -u hdfs hdfs dfs -ls /tmp | grep scratch || exit 1
+set +x
 echo "SUCCESS"
+
 
 
 # start the metastore
 echo -e "\n#####  Starting the metastore on $hive"
-if ! ec2-ssh $hive "ps -ef | grep -v grep | grep -q metastore"; then
-    ec2-ssh $hive "sudo -u hive nohup hive --service metastore>$HIVE_LOG_DIR/hive.out 2>$HIVE_LOG_DIR/hive.log &" || exit 1
+if ! ec2-ssh $hive "ps -ef | grep -v grep | grep -q HiveMetaStore"; then
+    bash -x ec2-ssh $hive "sudo -u hive echo 'hive --service metastore 2>&1 | sudo -u hive tee '$HIVE_LOG_DIR'/hivemetastore.out' | at now" || exit 1
 else
     echo -e "\n#####  Skipping start, metastore on $hive already running"
 fi
@@ -92,8 +100,8 @@ echo "SUCCESS"
 
 # start hiveserver 2
 echo -e "\n#####  Starting hiveserver2 on $hive"
-if ! ec2-ssh $hive "ps -ef | grep -v grep | grep -qi hiveserver2"; then
-    ec2-ssh $hive "sudo -u hive /usr/lib/hive/bin/hiveserver2 >$HIVE_LOG_DIR/hiveserver2.out 2> $HIVE_LOG_DIR/hiveserver2.log &" || exit 1
+if ! ec2-ssh $hive "ps -ef | grep -v grep | grep -qi HiveServer2"; then
+    bash -x ec2-ssh $hive "sudo -u hive echo '/usr/lib/hive/bin/hiveserver2 2>&1 | sudo -u hive tee '$HIVE_LOG_DIR'/hiveserver2.out' | at now" || exit 1
 else
     echo -e "\n#####  Skipping start, hiveserver2 on $hive already running"
 fi

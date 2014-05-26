@@ -126,6 +126,13 @@ sudo -u hdfs hdfs dfs -mkdir -p /tmp || exit 1
 sudo -u hdfs hdfs dfs -chmod 1777 /tmp || exit 1
 echo "SUCCESS"
 
+# Create the hdfs /user dir and change perms
+echo -e "\n#####  Creating the HDFS /user dir"
+sudo -u hdfs hdfs dfs -mkdir -p /user || exit 1
+sudo -u hdfs hdfs dfs -chmod 775 /user || exit 1
+echo "SUCCESS"
+
+
 # Show the contents of HDFS /
 echo -e "\n#####  Listing HDFS / contents"
 sudo -u hdfs hdfs dfs -ls / || exit 1

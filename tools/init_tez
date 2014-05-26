@@ -58,7 +58,6 @@ tez_profile_script="/etc/profile.d/tez.sh"
 #
 source $helpers_dir/scripts/usersAndGroups.sh
 source $helpers_dir/scripts/directories.sh
-env
 
 #
 # Main
@@ -73,19 +72,35 @@ fi
 
 ec2-ssh $tez "echo 'export TEZ_CONF_DIR='$TEZ_CONF_DIR'' | sudo tee -a $tez_profile_script" || exit 1
 ec2-ssh $tez "echo 'export TEZ_JARS='$TEZ_JARS'' | sudo tee -a $tez_profile_script" || exit 1
+ec2-ssh $tez "echo 'source /etc/hadoop/conf/hadoop-env.sh' | sudo tee -a $tez_profile_script" || exit 1
 ec2-ssh $tez "sudo chmod 775 $tez_profile_script" || exit 1
 echo "$tez_profile_script contents on $tez:"
 ec2-ssh $tez "cat $tez_profile_script" || exit 1
 echo "SUCCESS"
 
-# Create the hdfs /tmp dir and change perms
-#echo -e "\n#####  Creating the job history server history directory"
-#sudo -u hdfs hdfs dfs -mkdir -p /mr-history/tmp || exit 1
-#sudo -u hdfs hdfs dfs -chmod 1777 /mr-history/tmp || exit 1
-#sudo -u hdfs hdfs dfs -mkdir -p /mr-history/done || exit 1
-#sudo -u hdfs hdfs dfs -chmod 1777 /mr-history/done || exit 1
-#sudo -u hdfs hdfs dfs -chown -R mapred:hadoop /mr-history || exit 1
-#echo "SUCCESS"
+# Create the tez app dir
+echo -e "\n#####  Creating the tez app dir"
+set -x
+sudo -u hdfs hdfs dfs -mkdir -p /apps/tez || exit 1
+set +x
+echo "SUCCESS"
+
+# Copy the tez libs into hdfs
+echo -e "\n#####  Copying the tez libs into HDFS"
+set -x
+sudo -u hdfs hdfs dfs -copyFromLocal /usr/lib/tez/* /apps/tez 
+sudo -u hdfs hdfs dfs -chown -R hdfs:hadoop /apps/tez || exit 1
+set +x
+echo "SUCCESS"
+
+# Enabled tez for hive queries
+echo -e "\n#####  Copying the hive libs needed by tez into HDFS"
+set -x
+sudo -u hdfs hdfs dfs -mkdir -p /apps/hive/install || exit 1
+sudo -u hdfs hdfs dfs -copyFromLocal /usr/lib/hive/lib/hive-exec-* /apps/hive/install/ || exit 1
+sudo -u hdfs hdfs dfs -chown -R hive:hadoop /apps/hive || exit 1
+set +x
+echo "SUCCESS"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0
