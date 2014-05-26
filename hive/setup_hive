@@ -151,7 +151,7 @@ ec2-ssh $node "sudo mysql -u root --password=mysql < $hive_conf_dir/grants.sql" 
 
 # Initialize the schema
 echo -e "\n#####  Installing hive database schema on $node"
-ec2-ssh $node "sudo -u hive $HIVE_HOME/bin/schematool -initSchema mysql" || exit 1
+ec2-ssh $node "sudo -u hive /usr/lib/hive/bin/schematool -initSchema -dbType mysql" 
 echo "SUCCESS"
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
