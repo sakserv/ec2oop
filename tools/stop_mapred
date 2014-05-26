@@ -65,7 +65,7 @@ echo -e "\nStarting $SCRIPT_NAME at `date`"
 
 # start the JHS
 echo -e "\n#####  Stopping the jobhistoryserver $jhs"
-if ec2-ssh $jhs "ps -ef | grep -v grep | grep -q proc_jobhistory"; then
+if ec2-ssh $jhs "ps -ef | grep -v grep | grep -q proc_historyserver"; then
     ec2-ssh $jhs "sudo -u mapred HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec/ /usr/lib/hadoop-mapreduce/sbin/mr-jobhistory-daemon.sh --config $HADOOP_CONF_DIR stop historyserver" || exit 1
 else
     echo -e "\n#####  Skipping stop, jobhistoryserver $jhs already stopped"
