@@ -136,10 +136,10 @@ echo "SUCCESS"
 
 # Copy storm.zip into hdfs
 echo -e "\n#####  Copying storm.zip to HDFS"
-bash -x
+set -x
 ec2-ssh $node "sudo -u hdfs hdfs dfs -mkdir -p /lib/storm/$storm_ver" || exit 1
 ec2-ssh $node "sudo -u hdfs hdfs dfs -put $storm_yarn_work_dir/storm-yarn/lib/storm.zip /lib/storm/$storm_ver/storm.zip" 
-bash +x
+set +x
 echo "/lib/storm/$storm_ver contents:"
 ec2-ssh $node "sudo -u hdfs hdfs dfs -ls /lib/storm/$storm_ver" || exit 1
 echo "SUCCESS"
