@@ -155,4 +155,12 @@ OOZIE_TMP_DIR="/var/tmp/oozie"
 #
 SQOOP_CONF_DIR="/etc/sqoop/conf"
 
+
+#
+# Tez
+#
+TEZ_CONF_DIR="/etc/tez/conf"
+
+TEZ_HOME_DIR="/usr/lib/tez"
+
 export HADOOP_LIBEXEC_DIR=/usr/lib/hadoop/libexec
