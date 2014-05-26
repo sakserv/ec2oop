@@ -149,12 +149,26 @@ ec2-ssh $node "find $HADOOP_CONF_DIR/ -ls"
 echo "SUCCESS"
 
 # Copying storm.yaml
-echo -e "\n#####  Copying $storm_conf_dir/storm.yaml to /etc/storm/conf in HDFS"
+echo -e "\n#####  Copying $storm_conf_dir/storm.yaml to /etc/storm/conf"
 ec2-ssh $node "sudo mkdir -p /etc/storm/conf" || exit 1
 ec2-ssh $node "sudo cp $storm_conf_dir/storm.yaml /etc/storm/conf/" || exit 1
 echo "/etc/storm/conf contents:"
 ec2-ssh $node "sudo find /etc/storm/conf/" || exit 1
 echo "SUCCESS"
+
+# Setup supervisord
+echo -e "\n#####  Configuring supervisord"
+if echo $node | grep nimbus; then
+    ec2-ssh $node "sudo cp $storm_conf_dir/supervisord_master.conf /etc/supervisord.conf" || exit 1
+    echo "/etc/supervisord.conf contents:"
+    ec2-ssh $node "sudo cat /etc/supervisord.conf" || exit 1
+    echo "SUCCESS"
+elif echo $node | grep storm; then
+    ec2-ssh $node "sudo cp $storm_conf_dir/supervisord_worker.conf /etc/supervisord.conf" || exit 1
+    echo "/etc/supervisord.conf contents:"
+    ec2-ssh $node "sudo cat /etc/supervisord.conf" || exit 1
+    echo "SUCCESS"
+fi
 
 echo -e "\nFinished $SCRIPT_NAME at `date`"
 exit 0

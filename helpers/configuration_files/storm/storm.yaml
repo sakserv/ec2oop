@@ -18,12 +18,14 @@
  storm.zookeeper.servers:
     - "zookeeper1.hadoop"
  nimbus.host: "nimbus.hadoop"
+ nimbus.port: 6627
  ui.port: 8080 
  supervisor.slots.ports:
     - 6700
     - 6701
-    - 6702
-    - 6703
+
+ logviewer.port: 8000
+ drpc.port: 3772
 # 
 # ##### These may optionally be filled in:
 #    
