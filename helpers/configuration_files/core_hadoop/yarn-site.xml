@@ -82,7 +82,7 @@
   </property>
     <property>
     <name>yarn.nodemanager.log-aggregation.compression-type</name>
-    <value>gz</value>
+    <value>none</value>
   </property>
     <property>
     <name>yarn.nodemanager.health-checker.script.path</name>
