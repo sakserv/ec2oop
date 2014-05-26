@@ -1,0 +1,160 @@
+#!/bin/bash
+###################################################
+#
+#  Name: setup_namenode
+#  Purpose: Initial storm setup
+#  Author: Shane Kumpf
+#
+###################################################
+
+#
+# Base variables
+#
+SCRIPT_NAME=`basename $0`
+SCRIPT_DIR=`cd $(dirname $0) && pwd`
+
+#
+# Functions
+#
+function usage
+{
+    echo "Usage: $SCRIPT_NAME -n <node name>"
+    exit 1
+}
+
+#
+# Validation
+#
+if [ `id -un` != "ec2-user" ]; then
+    echo "ERROR: Must run as ec2-user"
+    exit 1
+fi
+
+#
+# Parse command line args
+#
+while getopts "n:" opt; do
+    case $opt in
+        n) 
+            node=$OPTARG;;
+        \?) 
+            echo "Invalid option: -$OPTARG"; usage;;
+    esac
+done
+
+if [ -z "$node" ]; then
+    usage
+fi
+
+#
+# Variables
+#
+work_dir="/tmp/work"
+git_ec2oop_url="https://github.com/sakserv/ec2oop.git"
+git_ec2_tools_url=" https://github.com/sakserv/ec2-tools"
+helpers_dir="$work_dir/ec2oop/helpers"
+common_dir="$work_dir/ec2oop/common"
+core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
+storm_conf_dir="$helpers_dir/configuration_files/storm"
+pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl storm supervisor"
+
+#
+# Prep work dir
+#
+if ec2-ssh $node "test -d $work_dir";  then
+    echo -e "\n#####  Cleaning up previous work directory $work_dir"
+    ec2-ssh $node "rm -rf $work_dir" || exit 1
+    echo "SUCCESS"
+fi
+
+# Create new work dir
+if ! ec2-ssh $node "test -d $work_dir";  then
+    echo -e "\n#####  Creating work directory $work_dir"
+    ec2-ssh $node "mkdir -p $work_dir" || exit 1
+    echo "SUCCESS"
+fi
+
+# git clone ec2-tools into work dir
+echo -e "\n#####  Cloning ec2-tools repo"
+ec2-ssh $node "(cd $work_dir && git clone $git_ec2_tools_url)" || exit 1
+echo "SUCCESS"
+
+# git clone ec2oop into work dir
+echo -e "\n#####  Pulling repo $git_ec2oop_url to $work_dir"
+ec2-ssh $node "(cd $work_dir && git clone $git_ec2oop_url)" || exit 1
+echo "SUCCESS"
+
+
+#
+# Prep work dir
+#
+if [ -d "$work_dir" ]; then
+    echo -e "\n#####  Cleaning up previous work directory $work_dir"
+    rm -rf $work_dir || exit 1
+    echo "SUCCESS"
+fi
+
+# Create new work dir
+if [ ! -d "$work_dir" ]; then
+    echo -e "\n#####  Creating work directory $work_dir"
+    mkdir -p $work_dir || exit 1
+    echo "SUCCESS"
+fi
+
+# git clone ec2-tools into work dir
+echo -e "\n#####  Cloning ec2-tools repo"
+(cd $work_dir && git clone $git_ec2_tools_url) || exit 1
+echo "SUCCESS"
+
+# git clone ec2oop into work dir
+echo -e "\n#####  Pulling repo $git_ec2oop_url to $work_dir"
+(cd $work_dir && git clone $git_ec2oop_url) || exit 1
+echo "SUCCESS"
+
+#
+# Source helpers
+#
+source $helpers_dir/scripts/usersAndGroups.sh
+source $helpers_dir/scripts/directories.sh
+
+#
+# Main
+#
+echo -e "\nStarting $SCRIPT_NAME at `date`"
+
+# Add yum repos
+echo -e "\n#####  Adding yum repos"
+ec2-ssh $node "$common_dir/add_yum_repos" || exit 1
+echo "SUCCESS"
+
+# Install java
+echo -e "\n#####  Installing Java"
+ec2-ssh $node "$common_dir/install_java" || exit 1
+echo "SUCCESS"
+
+# Install Hadoop packages
+for pkg in $pkg_list; do
+    echo -e "\n#####  Installing $pkg on $node"
+    ec2-ssh $node "sudo yum install -y $pkg" || exit 1
+    echo "SUCCESS"
+done
+
+# Copy core hadoop config to $HADOOP_CONF_DIR
+echo -e "\n#####  Copying core hadoop config from $core_conf_dir to $HADOOP_CONF_DIR"
+ec2-ssh $node "sudo cp -Rp $core_conf_dir/* $HADOOP_CONF_DIR/" || exit 1
+ec2-ssh $node "sudo chown -R $dirs_user:$dirs_group $HADOOP_CONF_DIR/" || exit 1
+ec2-ssh $node "sudo chmod -R 755 $HADOOP_CONF_DIR/" || exit 1
+echo "$HADOOP_CONF_DIR contents:"
+ec2-ssh $node "find $HADOOP_CONF_DIR/ -ls"
+echo "SUCCESS"
+
+# Copying storm.yaml
+echo -e "\n#####  Copying $storm_conf_dir/storm.yaml to /etc/storm/conf in HDFS"
+ec2-ssh $node "sudo mkdir -p /etc/storm/conf" || exit 1
+ec2-ssh $node "sudo cp $storm_conf_dir/storm.yaml /etc/storm/conf/" || exit 1
+echo "/etc/storm/conf contents:"
+ec2-ssh $node "sudo find /etc/storm/conf/" || exit 1
+echo "SUCCESS"
+
+echo -e "\nFinished $SCRIPT_NAME at `date`"
+exit 0
