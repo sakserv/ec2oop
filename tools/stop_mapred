@@ -18,7 +18,7 @@ SCRIPT_DIR=`cd $(dirname $0) && pwd`
 #
 function usage
 {
-    echo "Usage: $SCRIPT_NAME -n <jobhistoryserver>"
+    echo "Usage: $SCRIPT_NAME -j <jobhistoryserver>"
     exit 1
 }
 
