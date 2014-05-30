@@ -114,6 +114,13 @@ sudo -u hdfs hdfs dfs -chmod -R 1777 /app-logs || exit 1
 sudo -u hdfs hdfs dfs -chown -R yarn /app-logs || exit 1
 echo "SUCCESS"
 
+# Create the hdfs /app-logs directory for log aggregation
+echo -e "\n#####  Creating the mr history dir"
+sudo -u hdfs hdfs dfs -mkdir -p /mr-history/tmp || exit 1
+sudo -u hdfs hdfs dfs -chmod -R 1777 /mr-history || exit 1
+sudo -u hdfs hdfs dfs -chown -R mapred /mr-history || exit 1
+echo "SUCCESS"
+
 # start the RM
 echo -e "\n#####  Starting the resourcemanager $resm"
 if ! ec2-ssh $resm "ps -ef | grep -v grep | grep -q proc_resourcemanager"; then

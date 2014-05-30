@@ -57,7 +57,7 @@ common_dir="$work_dir/ec2oop/common"
 core_conf_dir="$helpers_dir/configuration_files/core_hadoop"
 hive_conf_dir="$helpers_dir/configuration_files/hive"
 tez_conf_dir="$helpers_dir/configuration_files/tez"
-pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl hive hive-hcatalog tez"
+pkg_list="hadoop hadoop-hdfs hadoop-libhdfs hadoop-yarn hadoop-mapreduce hadoop-client openssl hive hive-hcatalog tez storm"
 
 #
 # Prep work dir

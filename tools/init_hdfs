@@ -109,7 +109,7 @@ echo -e "\nStarting $SCRIPT_NAME at `date`"
 # format the namenode
 is_formatted=""
 for dir_name in $DFS_NAME_DIR; do 
-    if ec2-ssh $nn "test -f $dir_name/in_use.lock"; then
+    if ec2-ssh $nn "test -d $dir_name/current"; then
         is_formatted="true"
     fi
 done
@@ -162,7 +162,7 @@ sudo -u hdfs hdfs dfs -mkdir -p /user || exit 1
 sudo -u hdfs hdfs dfs -chmod 775 /user || exit 1
 echo "SUCCESS"
 
-# Create the hdfs /user dir and change perms
+# Create the hdfs user directory for ec2-user
 echo -e "\n#####  Creating the HDFS /user/ec2-user home dir"
 sudo -u hdfs hdfs dfs -mkdir -p /user/ec2-user || exit 1
 sudo -u hdfs hdfs dfs -chmod 775 /user/ec2-user || exit 1
